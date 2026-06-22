@@ -161,6 +161,9 @@ def shap_from_firebase_doc(body: FirebaseDocInput):
 
     try:
         result = compute_shap(n=npk["N"], p=npk["P"], k=npk["K"])
+        # Override predictions dengan dosis aktual dari Firebase (CD/UD/SD)
+        firebase_doses = _parse_doses_from_firebase(data)
+        result = result.model_copy(update={"predictions": firebase_doses})
         return result
     except Exception as exc:
         logger.exception("Error computing SHAP from Firebase data")
@@ -206,6 +209,9 @@ def shap_from_firebase_latest(base_path: str = ""):
 
     try:
         result = compute_shap(n=npk["N"], p=npk["P"], k=npk["K"])
+        # Override predictions dengan dosis aktual dari Firebase (CD/UD/SD)
+        firebase_doses = _parse_doses_from_firebase(data)
+        result = result.model_copy(update={"predictions": firebase_doses})
         return result
     except Exception as exc:
         logger.exception("Error computing SHAP from latest Firebase data")
@@ -247,4 +253,28 @@ def _parse_npk_from_firebase(data: dict, path: str) -> dict:
         "N": _get(["N", "N (%)", "nitrogen"], "N (Nitrogen)"),
         "P": _get(["P", "P (ppm)", "phosphorus"], "P (Phosphorus)"),
         "K": _get(["K", "K (ppm)", "potassium"], "K (Potassium)"),
+    }
+
+
+def _parse_doses_from_firebase(data: dict) -> dict:
+    """
+    Ekstrak dosis pupuk aktual dari Firebase:
+    - CD (kcl_dose)   → KCL
+    - UD (urea_dose)  → UREA
+    - SD (sp36_dose)  → SP-36
+
+    Nilai None dikembalikan jika field tidak ada atau tidak bisa dikonversi.
+    """
+    def safe_int(val) -> Optional[int]:
+        if val is None:
+            return None
+        try:
+            return int(float(val))
+        except (TypeError, ValueError):
+            return None
+
+    return {
+        "KCL":  {"dose_kg_ha": safe_int(data.get("CD")), "source": "firebase"},
+        "UREA": {"dose_kg_ha": safe_int(data.get("UD")), "source": "firebase"},
+        "SP-36": {"dose_kg_ha": safe_int(data.get("SD")), "source": "firebase"},
     }
