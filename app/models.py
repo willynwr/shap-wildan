@@ -42,10 +42,8 @@ class FeatureImportance(BaseModel):
 
 
 class FertilizerSHAP(BaseModel):
-    """Hasil SHAP untuk satu jenis pupuk."""
+    """Hasil SHAP analysis untuk satu jenis pupuk (hanya feature importance)."""
     fertilizer: str
-    predicted_class: int
-    predicted_dose_kg_ha: Optional[int]
     feature_importances: list[FeatureImportance]
 
 

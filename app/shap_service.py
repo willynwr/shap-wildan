@@ -150,8 +150,6 @@ def compute_shap(n: float, p: float, k: float) -> SHAPResponse:
         shap_results.append(
             FertilizerSHAP(
                 fertilizer=tgt,
-                predicted_class=int(pred_class_label),
-                predicted_dose_kg_ha=int(pred_dose) if pred_dose is not None else None,
                 feature_importances=feature_importances,
             )
         )

@@ -4,6 +4,7 @@ Entry point FastAPI – SHAP Feature Importance Service
 """
 import logging
 from contextlib import asynccontextmanager
+from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
