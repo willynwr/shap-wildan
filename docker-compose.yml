@@ -9,7 +9,7 @@ services:
     container_name: shap-api
     image: shap-api:latest
     ports:
-      - "8000:8000"
+      - "8016:8000"
     env_file:
       - .env
     volumes:
